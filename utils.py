@@ -4,11 +4,19 @@ Utility functions for the Simple Network Scanner.
 """
 
 import os
+import sys
 import json
 import csv
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Union
-import ipaddress
+
+# Try to import required modules, with helpful error messages
+try:
+    import ipaddress
+except ImportError:
+    print("Error: ipaddress module not found. Please run 'pip install ipaddress' or 'pip3 install ipaddress'")
+    print("If you're using Homebrew Python, you may need to use: /opt/homebrew/bin/pip3 install ipaddress")
+    sys.exit(1)
 
 
 def validate_ip(ip: str) -> bool:
@@ -92,10 +100,14 @@ def export_to_json(data: Dict[str, Any], filename: Optional[str] = None) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"scan_results_{timestamp}.json"
     
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=4)
-    
-    return os.path.abspath(filename)
+    try:
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=4)
+        print(f"[+] Results exported to {filename}")
+        return os.path.abspath(filename)
+    except Exception as e:
+        print(f"[!] Error exporting to JSON: {e}")
+        return ""
 
 
 def export_to_csv(hosts: List[Dict[str, Any]], filename: Optional[str] = None) -> str:
@@ -115,12 +127,16 @@ def export_to_csv(hosts: List[Dict[str, Any]], filename: Optional[str] = None) -
     
     fieldnames = ['ip', 'mac', 'hostname']
     
-    with open(filename, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(hosts)
-    
-    return os.path.abspath(filename)
+    try:
+        with open(filename, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(hosts)
+        print(f"[+] Host data exported to {filename}")
+        return os.path.abspath(filename)
+    except Exception as e:
+        print(f"[!] Error exporting to CSV: {e}")
+        return ""
 
 
 def export_port_scan_to_csv(results: Dict[str, Any], filename: Optional[str] = None) -> str:
@@ -156,16 +172,21 @@ def export_port_scan_to_csv(results: Dict[str, Any], filename: Optional[str] = N
             })
     
     if not rows:
+        print("[!] No port scan data to export")
         return ""
     
     fieldnames = ['ip', 'port', 'state', 'service', 'product', 'version']
     
-    with open(filename, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
-    
-    return os.path.abspath(filename)
+    try:
+        with open(filename, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        print(f"[+] Port scan data exported to {filename}")
+        return os.path.abspath(filename)
+    except Exception as e:
+        print(f"[!] Error exporting to CSV: {e}")
+        return ""
 
 
 def print_banner() -> None:
