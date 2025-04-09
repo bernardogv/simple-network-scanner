@@ -1,5 +1,7 @@
-scapy==2.5.0
-python-nmap==0.7.1
-argparse==1.4.0
-ipaddress==1.0.23
-colorama==0.4.6
+scapy>=2.5.0
+python-nmap>=0.7.1
+# argparse is part of the Python standard library in Python 3.2+, 
+# but keeping it for compatibility with older Python versions
+argparse>=1.4.0
+ipaddress>=1.0.23
+colorama>=0.4.6
