@@ -8,19 +8,60 @@ import argparse
 import ipaddress
 import socket
 import sys
+import os
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Union, Tuple
 
+# Define fallback implementations for colorama
+class FallbackColors:
+    BLUE = ''
+    GREEN = ''
+    RED = ''
+    YELLOW = ''
+    CYAN = ''
+    RESET_ALL = ''
+
+# First check if the required packages are installed
+missing_packages = []
+
 try:
     import nmap
-    from scapy.all import ARP, Ether, srp
-    from colorama import Fore, Style, init
 except ImportError:
-    print("Error: Required libraries not found. Please run 'pip install -r requirements.txt'")
-    sys.exit(1)
+    missing_packages.append("python-nmap")
 
-# Initialize colorama
-init()
+try:
+    from scapy.all import ARP, Ether, srp
+except ImportError:
+    missing_packages.append("scapy")
+
+try:
+    from colorama import Fore, Style, init
+    # Initialize colorama
+    init()
+except ImportError:
+    missing_packages.append("colorama")
+    # Define fallback if colorama isn't available
+    Fore = FallbackColors()
+    Style = FallbackColors()
+
+# If any packages are missing, provide clear instructions
+if missing_packages:
+    print(f"Error: The following required packages are missing: {', '.join(missing_packages)}")
+    print("Please install them using one of the following commands:")
+    print("\npip install -r requirements.txt")
+    print("# OR")
+    print(f"pip install {' '.join(missing_packages)}")
+    print("\n# If you're using Python 3 specifically:")
+    print("pip3 install -r requirements.txt")
+    print("# OR")
+    print(f"pip3 install {' '.join(missing_packages)}")
+    
+    # Check if the user is using Homebrew Python and provide additional guidance
+    if "HOMEBREW" in os.environ.get("PATH", "") or "/opt/homebrew" in os.environ.get("PATH", ""):
+        print("\nNOTE: It appears you're using Homebrew Python. You might need to use:")
+        print(f"/opt/homebrew/bin/pip3 install {' '.join(missing_packages)}")
+    
+    sys.exit(1)
 
 class NetworkScanner:
     """Network scanning utility with various scanning capabilities."""
